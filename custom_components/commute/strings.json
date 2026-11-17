@@ -1,0 +1,179 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Add a person",
+        "description": "Commute follows one person between their home zone and their work zone. A trip that starts at home counts as a commute on a work day once it clearly heads for work; leaving work always starts the commute home.",
+        "data": {
+          "name": "Name",
+          "person": "Person",
+          "home_zone": "Home zone",
+          "work_zone": "Work zone",
+          "work_days": "Work days",
+          "vehicle": "On the road in a vehicle, guess",
+          "activity_sensor": "Activity sensor (optional)",
+          "ns_to_work": "NS route to work (optional)",
+          "ns_to_home": "NS route home (optional)",
+          "ns_tracker": "NS train tracker (optional)"
+        },
+        "data_description": {
+          "person": "Where the person is, from the Home Assistant Companion app on their phone.",
+          "work_days": "A trip from home counts as a commute only on these days.",
+          "vehicle": "What a vehicle between 25 and 60 km/h is, when nothing else tells: public transport (metro, tram or bus) or a car.",
+          "activity_sensor": "The phone's activity sensor: sensor.<phone>_activity on an iPhone, sensor.<phone>_detected_activity on Android. It makes walking, cycling and riding much surer.",
+          "ns_to_work": "A route sensor of NS Reisadvies (HACS) from your station to the station near work: gives the train and its delay.",
+          "ns_to_home": "The same, the other way.",
+          "ns_tracker": "NS Reisadvies' train tracker of a route: when it is near the person, they are on that train."
+        }
+      }
+    },
+    "error": {
+      "same_zone": "Home and work must be different zones.",
+      "no_days": "Choose at least one work day.",
+      "no_zone": "This zone has no place (latitude and longitude)."
+    },
+    "abort": {
+      "already_configured": "This person is already followed."
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "Commute settings",
+        "data": {
+          "home_zone": "Home zone",
+          "work_zone": "Work zone",
+          "work_days": "Work days",
+          "vehicle": "On the road in a vehicle, guess",
+          "activity_sensor": "Activity sensor (optional)",
+          "ns_to_work": "NS route to work (optional)",
+          "ns_to_home": "NS route home (optional)",
+          "ns_tracker": "NS train tracker (optional)"
+        },
+        "data_description": {
+          "work_days": "A trip from home counts as a commute only on these days.",
+          "vehicle": "What a vehicle between 25 and 60 km/h is, when nothing else tells: public transport (metro, tram or bus) or a car.",
+          "activity_sensor": "The phone's activity sensor: sensor.<phone>_activity on an iPhone, sensor.<phone>_detected_activity on Android. It makes walking, cycling and riding much surer.",
+          "ns_to_work": "A route sensor of NS Reisadvies (HACS) from your station to the station near work: gives the train and its delay.",
+          "ns_to_home": "The same, the other way.",
+          "ns_tracker": "NS Reisadvies' train tracker of a route: when it is near the person, they are on that train."
+        }
+      }
+    },
+    "error": {
+      "same_zone": "Home and work must be different zones.",
+      "no_days": "Choose at least one work day.",
+      "no_zone": "This zone has no place (latitude and longitude)."
+    }
+  },
+  "selector": {
+    "work_days": {
+      "options": {
+        "mon": "Monday",
+        "tue": "Tuesday",
+        "wed": "Wednesday",
+        "thu": "Thursday",
+        "fri": "Friday",
+        "sat": "Saturday",
+        "sun": "Sunday"
+      }
+    },
+    "vehicle": {
+      "options": {
+        "transit": "Public transport",
+        "car": "Car"
+      }
+    }
+  },
+  "entity": {
+    "sensor": {
+      "commute": {
+        "name": "Commute",
+        "state": {
+          "none": "Not commuting",
+          "walking": "Walking",
+          "cycling": "Cycling",
+          "train": "Train",
+          "transit": "Public transport",
+          "car": "Car",
+          "unknown": "Unknown"
+        },
+        "state_attributes": {
+          "commute_phase": {
+            "name": "Phase",
+            "state": {
+              "home": "Home",
+              "maybe": "Maybe on the way to work",
+              "to_work": "To work",
+              "work": "At work",
+              "to_home": "To home",
+              "away": "Away"
+            }
+          },
+          "direction": {
+            "name": "Direction",
+            "state": {
+              "to_work": "To work",
+              "to_home": "To home"
+            }
+          },
+          "progress": {
+            "name": "Progress"
+          },
+          "eta_at": {
+            "name": "Arrival"
+          },
+          "started_at": {
+            "name": "Left at"
+          },
+          "speed": {
+            "name": "Speed"
+          },
+          "activity": {
+            "name": "Activity"
+          },
+          "ns_distance": {
+            "name": "NS train distance"
+          },
+          "train": {
+            "name": "Train"
+          },
+          "delay": {
+            "name": "Delay"
+          },
+          "ns_status": {
+            "name": "NS status"
+          },
+          "place_at": {
+            "name": "Last place"
+          },
+          "person": {
+            "name": "Person"
+          }
+        }
+      },
+      "progress": {
+        "name": "Commute progress"
+      },
+      "arrival": {
+        "name": "Commute arrival"
+      },
+      "direction": {
+        "name": "Commute direction",
+        "state": {
+          "none": "Not commuting",
+          "to_work": "To work",
+          "to_home": "To home"
+        }
+      },
+      "train_delay": {
+        "name": "Train delay"
+      }
+    },
+    "binary_sensor": {
+      "commuting": {
+        "name": "Commuting"
+      }
+    }
+  }
+}

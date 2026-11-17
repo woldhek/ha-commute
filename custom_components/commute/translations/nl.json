@@ -1,0 +1,179 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Persoon toevoegen",
+        "description": "Commute volgt één persoon tussen de thuiszone en de werkzone. Een reis vanaf thuis telt op een werkdag als woon-werkreis zodra die duidelijk richting werk gaat; het werk verlaten start altijd de reis naar huis.",
+        "data": {
+          "name": "Naam",
+          "person": "Persoon",
+          "home_zone": "Thuiszone",
+          "work_zone": "Werkzone",
+          "work_days": "Werkdagen",
+          "vehicle": "In een voertuig op de weg, gok",
+          "activity_sensor": "Activiteitssensor (optioneel)",
+          "ns_to_work": "NS-route naar werk (optioneel)",
+          "ns_to_home": "NS-route naar huis (optioneel)",
+          "ns_tracker": "NS-treintracker (optioneel)"
+        },
+        "data_description": {
+          "person": "Waar de persoon is, van de Home Assistant Companion-app op de telefoon.",
+          "work_days": "Een reis vanaf thuis telt alleen op deze dagen als woon-werkreis.",
+          "vehicle": "Wat een voertuig tussen 25 en 60 km/u is als niets anders het zegt: openbaar vervoer (metro, tram of bus) of een auto.",
+          "activity_sensor": "De activiteitssensor van de telefoon: sensor.<telefoon>_activity op een iPhone, sensor.<telefoon>_detected_activity op Android. Lopen, fietsen en rijden worden daarmee veel zekerder.",
+          "ns_to_work": "Een routesensor van NS Reisadvies (HACS) van je station naar het station bij je werk: geeft de trein en de vertraging.",
+          "ns_to_home": "Hetzelfde, de andere kant op.",
+          "ns_tracker": "De treintracker van een route uit NS Reisadvies: is die bij de persoon, dan zit die in die trein."
+        }
+      }
+    },
+    "error": {
+      "same_zone": "Thuis en werk moeten verschillende zones zijn.",
+      "no_days": "Kies minstens één werkdag.",
+      "no_zone": "Deze zone heeft geen plek (breedte- en lengtegraad)."
+    },
+    "abort": {
+      "already_configured": "Deze persoon wordt al gevolgd."
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "Instellingen van Commute",
+        "data": {
+          "home_zone": "Thuiszone",
+          "work_zone": "Werkzone",
+          "work_days": "Werkdagen",
+          "vehicle": "In een voertuig op de weg, gok",
+          "activity_sensor": "Activiteitssensor (optioneel)",
+          "ns_to_work": "NS-route naar werk (optioneel)",
+          "ns_to_home": "NS-route naar huis (optioneel)",
+          "ns_tracker": "NS-treintracker (optioneel)"
+        },
+        "data_description": {
+          "work_days": "Een reis vanaf thuis telt alleen op deze dagen als woon-werkreis.",
+          "vehicle": "Wat een voertuig tussen 25 en 60 km/u is als niets anders het zegt: openbaar vervoer (metro, tram of bus) of een auto.",
+          "activity_sensor": "De activiteitssensor van de telefoon: sensor.<telefoon>_activity op een iPhone, sensor.<telefoon>_detected_activity op Android. Lopen, fietsen en rijden worden daarmee veel zekerder.",
+          "ns_to_work": "Een routesensor van NS Reisadvies (HACS) van je station naar het station bij je werk: geeft de trein en de vertraging.",
+          "ns_to_home": "Hetzelfde, de andere kant op.",
+          "ns_tracker": "De treintracker van een route uit NS Reisadvies: is die bij de persoon, dan zit die in die trein."
+        }
+      }
+    },
+    "error": {
+      "same_zone": "Thuis en werk moeten verschillende zones zijn.",
+      "no_days": "Kies minstens één werkdag.",
+      "no_zone": "Deze zone heeft geen plek (breedte- en lengtegraad)."
+    }
+  },
+  "selector": {
+    "work_days": {
+      "options": {
+        "mon": "maandag",
+        "tue": "dinsdag",
+        "wed": "woensdag",
+        "thu": "donderdag",
+        "fri": "vrijdag",
+        "sat": "zaterdag",
+        "sun": "zondag"
+      }
+    },
+    "vehicle": {
+      "options": {
+        "transit": "Openbaar vervoer",
+        "car": "Auto"
+      }
+    }
+  },
+  "entity": {
+    "sensor": {
+      "commute": {
+        "name": "Woon-werkreis",
+        "state": {
+          "none": "Niet onderweg",
+          "walking": "Lopen",
+          "cycling": "Fietsen",
+          "train": "Trein",
+          "transit": "Openbaar vervoer",
+          "car": "Auto",
+          "unknown": "Onbekend"
+        },
+        "state_attributes": {
+          "commute_phase": {
+            "name": "Fase",
+            "state": {
+              "home": "Thuis",
+              "maybe": "Misschien op weg naar werk",
+              "to_work": "Naar werk",
+              "work": "Op het werk",
+              "to_home": "Naar huis",
+              "away": "Weg"
+            }
+          },
+          "direction": {
+            "name": "Richting",
+            "state": {
+              "to_work": "Naar werk",
+              "to_home": "Naar huis"
+            }
+          },
+          "progress": {
+            "name": "Voortgang"
+          },
+          "eta_at": {
+            "name": "Aankomst"
+          },
+          "started_at": {
+            "name": "Vertrokken om"
+          },
+          "speed": {
+            "name": "Snelheid"
+          },
+          "activity": {
+            "name": "Activiteit"
+          },
+          "ns_distance": {
+            "name": "Afstand tot NS-trein"
+          },
+          "train": {
+            "name": "Trein"
+          },
+          "delay": {
+            "name": "Vertraging"
+          },
+          "ns_status": {
+            "name": "NS-status"
+          },
+          "place_at": {
+            "name": "Laatste plek"
+          },
+          "person": {
+            "name": "Persoon"
+          }
+        }
+      },
+      "progress": {
+        "name": "Voortgang woon-werkreis"
+      },
+      "arrival": {
+        "name": "Aankomst woon-werkreis"
+      },
+      "direction": {
+        "name": "Richting woon-werkreis",
+        "state": {
+          "none": "Niet onderweg",
+          "to_work": "Naar werk",
+          "to_home": "Naar huis"
+        }
+      },
+      "train_delay": {
+        "name": "Treinvertraging"
+      }
+    },
+    "binary_sensor": {
+      "commuting": {
+        "name": "Onderweg"
+      }
+    }
+  }
+}
