@@ -497,7 +497,9 @@ class Trip:
         self.mode = mode
         self.why = why
         self.pending, self.pending_count = None, 0
-        self.legs.append([mode, round(now), round(self.progress * 100)])
+        # The first leg starts where the trip started; the others where the person was when the way changed.
+        self.legs.append([mode, round(self.start_at or now) if not self.legs else round(now),
+                          0 if not self.legs else round(self.progress * 100)])
         del self.legs[:-8]
         if self.trail:
             self.trail[-1][2] = MODES.index(mode) if self.trail[-1][2] == MODES.index(UNKNOWN) else self.trail[-1][2]
