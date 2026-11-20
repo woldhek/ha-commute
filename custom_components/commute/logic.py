@@ -52,6 +52,7 @@ TRAIL_SEND = 32                # points sent to the screen
 FRESH_S = 10 * 60              # a speed older than this says nothing
 HISTORY_KEEP = 10              # commute durations kept per direction
 NS_NEAR_KM = 1.5               # the NS tracker this close says "train"
+JOURNAL_KEEP = 600             # entries of the journal kept (about two days of commuting)
 
 
 def distance_m(a: tuple[float, float], b: tuple[float, float]) -> float:
@@ -238,6 +239,8 @@ class Trip:
     speed_kmh: float | None = None
     hints: dict[str, Any] = field(default_factory=dict)
     work_day: str | None = None                              # the last day the person was at work
+    journal: list[dict[str, Any]] = field(default_factory=list)  # what it heard and decided, newest last
+    note: str = ""                                           # why the phase last changed
 
     # ---- saving ----
     def to_dict(self) -> dict[str, Any]:
@@ -311,7 +314,33 @@ class Trip:
 
     # ---- what it hears ----
     def update(self, now: float, s: Settings, zone: str | None, fix: Fix | None, workday: bool, hints: Hints) -> None:
-        """Take what Home Assistant knows now. `zone` is "home", "work" or None (neither)."""
+        """Take what Home Assistant knows now. `zone` is "home", "work" or None (neither).
+
+        Every call that brings a new place, or changes the phase or the guess, goes in the journal with what came in, so
+        a trip can be played back afterwards (tools/replay.py, from the diagnostics download)."""
+        before = (self.phase, self.mode, self.last[2] if self.last else None)
+        self._update(now, s, zone, fix, workday, hints)
+        new_place = fix is not None and (before[2] is None or fix.at != before[2])
+        if new_place or before[:2] != (self.phase, self.mode):
+            entry: dict[str, Any] = {"at": round(now), "zone": zone, "workday": workday, "phase": self.phase,
+                                     "mode": self.mode, "progress": round(self.progress * 100), "why": list(self.why)}
+            if fix is not None:
+                entry["fix"] = [round(fix.lat, 5), round(fix.lon, 5), round(fix.at), round(fix.accuracy),
+                                None if fix.speed is None else round(fix.speed, 1)]
+            if self.speed_kmh is not None:
+                entry["speed"] = round(self.speed_kmh)
+            if hints.activity:
+                entry["activity"] = hints.activity
+            if hints.ns_tracker_km is not None:
+                entry["ns_km"] = round(hints.ns_tracker_km, 2)
+            if hints.ns_trip:
+                entry["ns"] = hints.ns_trip.get("label")
+            if before[0] != self.phase:
+                entry["note"] = self.note
+            self.journal.append(entry)
+            del self.journal[:-JOURNAL_KEEP]
+
+    def _update(self, now: float, s: Settings, zone: str | None, fix: Fix | None, workday: bool, hints: Hints) -> None:
         self.hints = {"activity": hints.activity, "ns_tracker_km": hints.ns_tracker_km, "ns_trip": hints.ns_trip}
         self._before = list(self.last) if self.last else None
         new_fix = self._take_fix(fix)
@@ -320,21 +349,26 @@ class Trip:
         if zone == "home":
             if self.phase == TO_HOME:
                 self._finish(now)
+            self._note(HOME, "in the home zone")
             self._enter(HOME, now)
             return
         if zone == "work":
             if self.phase in (TO_WORK, MAYBE):
                 self._finish(now)
+            self._note(WORK, "in the work zone")
             self._enter(WORK, now)
             return
 
         here = fix.point if fix else (tuple(self.last[:2]) if self.last else None)
         if self.phase == HOME:
             if workday:
+                self.note = "left home on a work day"
                 self._start(MAYBE, now, s)
             else:
+                self.note = "left home on a day off"
                 self._enter(AWAY, now)
         elif self.phase == WORK:
+            self.note = "left the work zone"
             self._start(TO_HOME, now, s)
 
         if here is None:
@@ -358,14 +392,17 @@ class Trip:
         if self.phase == MAYBE:
             closer = (self.start_dist_km or dist_work) - dist_work
             if raw >= CONFIRM_PROGRESS and closer >= CONFIRM_MIN_KM:
+                self.note = f"{round(raw * 100)}% and {closer:.1f} km closer to work"
                 self.phase = TO_WORK
                 self.best = raw
             elif raw < -0.10 or now - (self.start_at or now) > MAYBE_TIMEOUT_S:
+                self.note = "further from work than home is" if raw < -0.10 else "not closer to work after 45 min"
                 self._enter(AWAY, now)
                 self.away_dist_km = dist_work
         elif self.phase in COMMUTING:
             self.best = max(self.best, raw)
             if self.best - raw > GIVE_UP_BACK:
+                self.note = f"went back: {round(self.best * 100)}% -> {round(raw * 100)}%"
                 self._enter(AWAY, now)
                 self.away_dist_km = dist_work
         elif self.phase == AWAY and workday and not self._been_to_work_today(now):
@@ -373,6 +410,7 @@ class Trip:
             if self.away_dist_km is None:
                 self.away_dist_km = dist_work
             elif self.away_dist_km - dist_work >= max(0.25 * total_km, 1.0):
+                self.note = "heading for work after going somewhere else"
                 self._start(TO_WORK, now, s)
                 self.progress = max(0.0, 1 - dist_work / total_km)
                 self.best = self.progress
@@ -381,6 +419,10 @@ class Trip:
         self._timeouts(now)
 
     # ---- inside ----
+    def _note(self, phase: str, text: str) -> None:
+        if phase != self.phase:
+            self.note = text
+
     def _enter(self, phase: str, now: float) -> None:
         if phase != self.phase:
             self.phase = phase
@@ -462,8 +504,10 @@ class Trip:
 
     def _timeouts(self, now: float) -> None:
         if self.phase == MAYBE and self.start_at is not None and now - self.start_at > MAYBE_TIMEOUT_S:
+            self.note = "not closer to work after 45 min"
             self._enter(AWAY, now)
         elif self.phase in COMMUTING and self.still_at is not None and now - self.still_at[2] > STILL_TIMEOUT_S:
+            self.note = "no move of 150 m in 40 min"
             self._enter(AWAY, now)
 
     def _guess(self, now: float, hints: Hints, s: Settings, new_fix: bool) -> None:

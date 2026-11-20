@@ -84,6 +84,18 @@ actions:
       message: "Anton is almost home."
 ```
 
+## When a commute is not seen
+
+1. **Settings → Devices & services → Commute**, open the person, and in the menu (⋮) choose **Download diagnostics**.
+   The file holds the journal of what the integration heard and decided, and the last 36 hours of the person's places
+   from Home Assistant's history. It says where the person was: share it only with whom you trust.
+2. Play it back: `python3 tools/replay.py <file> --day 2026-11-20` prints every place the phone sent (with the gap
+   since the one before), the phase and the guess, and why each phase changed. `--journal` prints what the
+   integration itself decided when it ran.
+
+An iPhone sends few places while you travel. Zones along the way (your station, the station near work) make it send
+one each time you pass them.
+
 ---
 
 ## Nederlands
@@ -135,3 +147,16 @@ trein. Met de activiteitssensor wordt de gok veel zekerder.
 6. Herhaal stap 4 voor iedere persoon.
 
 De entiteiten en attributen staan in de Engelse tabel hierboven.
+
+### Als een reis niet gezien wordt
+
+1. **Instellingen → Apparaten en diensten → Commute**, open de persoon, en kies in het menu (⋮) **Diagnostische
+   gegevens downloaden**. Het bestand bevat het logboek van wat de integratie hoorde en besloot, en de laatste 36 uur
+   aan plekken van de persoon uit de geschiedenis van Home Assistant. Het zegt waar iemand was: deel het alleen met
+   wie je vertrouwt.
+2. Speel het na: `python3 tools/replay.py <bestand> --day 2026-11-20` toont elke plek die de telefoon stuurde (met
+   de tijd sinds de vorige), de fase en de gok, en waarom elke fase veranderde. `--journal` toont wat de integratie zelf
+   besloot toen ze draaide.
+
+Een iPhone stuurt onderweg weinig plekken. Zones langs de route (je station, het station bij je werk) laten hem er
+een sturen telkens als je erlangs komt.
